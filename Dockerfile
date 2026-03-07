@@ -27,11 +27,8 @@ RUN corepack enable && corepack prepare pnpm@10.22.0 --activate
 
 WORKDIR /app
 
-COPY --from=deps /app/node_modules ./node_modules
-COPY --from=deps /app/apps/server/node_modules ./apps/server/node_modules
-COPY --from=deps /app/apps/webapp/node_modules ./apps/webapp/node_modules
-COPY --from=deps /app/apps/desktop/node_modules ./apps/desktop/node_modules
-COPY --from=deps /app/packages/shared/node_modules ./packages/shared/node_modules
+# Copy all installed node_modules from deps stage
+COPY --from=deps /app/ ./
 
 # Copy source code
 COPY packages/shared/ packages/shared/
