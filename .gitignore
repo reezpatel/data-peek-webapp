@@ -35,3 +35,6 @@ coverage/
 
 # MCP
 .playwright-mcp/
+
+# Server runtime data
+apps/server/data/

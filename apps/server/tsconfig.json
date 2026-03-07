@@ -1,0 +1,28 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ES2022",
+    "moduleResolution": "bundler",
+    "esModuleInterop": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "outDir": "dist",
+    "rootDir": ".",
+    "composite": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "baseUrl": ".",
+    "paths": {
+      "@shared/*": ["../../packages/shared/src/*"],
+      "@data-peek/shared": ["../../packages/shared/src/index.ts"],
+      "@desktop/*": ["../desktop/src/main/*"]
+    }
+  },
+  "include": [
+    "src/**/*",
+    "../../packages/shared/src/**/*",
+    "../desktop/src/main/**/*"
+  ],
+  "exclude": ["node_modules", "dist"]
+}

@@ -1,0 +1,90 @@
+# Stage 1: Install dependencies
+FROM node:22-slim AS deps
+
+RUN corepack enable && corepack prepare pnpm@10.22.0 --activate
+
+WORKDIR /app
+
+# Copy workspace config
+COPY pnpm-workspace.yaml package.json pnpm-lock.yaml ./
+
+# Copy package.json files for all workspaces needed
+COPY apps/server/package.json apps/server/package.json
+COPY apps/webapp/package.json apps/webapp/package.json
+COPY apps/desktop/package.json apps/desktop/package.json
+COPY packages/shared/package.json packages/shared/package.json
+
+# Copy server shims (referenced as file: deps in server/package.json)
+COPY apps/server/shims/ apps/server/shims/
+
+# Install all dependencies (including devDependencies for build)
+RUN pnpm install --frozen-lockfile --ignore-scripts
+
+# Stage 2: Build webapp
+FROM node:22-slim AS webapp-builder
+
+RUN corepack enable && corepack prepare pnpm@10.22.0 --activate
+
+WORKDIR /app
+
+COPY --from=deps /app/node_modules ./node_modules
+COPY --from=deps /app/apps/server/node_modules ./apps/server/node_modules
+COPY --from=deps /app/apps/webapp/node_modules ./apps/webapp/node_modules
+COPY --from=deps /app/apps/desktop/node_modules ./apps/desktop/node_modules
+COPY --from=deps /app/packages/shared/node_modules ./packages/shared/node_modules
+
+# Copy source code
+COPY packages/shared/ packages/shared/
+COPY apps/webapp/ apps/webapp/
+
+# Build webapp (produces apps/webapp/dist/)
+RUN cd apps/webapp && npx vite build
+
+# Stage 3: Production runtime
+FROM node:22-slim AS production
+
+RUN corepack enable && corepack prepare pnpm@10.22.0 --activate
+
+WORKDIR /app
+
+# Copy workspace config
+COPY pnpm-workspace.yaml package.json pnpm-lock.yaml ./
+COPY apps/server/package.json apps/server/package.json
+COPY apps/desktop/package.json apps/desktop/package.json
+COPY packages/shared/package.json packages/shared/package.json
+
+# Copy server shims
+COPY apps/server/shims/ apps/server/shims/
+
+# Install production dependencies only (plus tsx for runtime TS transpilation)
+RUN pnpm install --frozen-lockfile --ignore-scripts --prod \
+    && cd apps/server && pnpm add tsx@^4.19.4 --save-dev
+
+# Copy shared types (needed at runtime by tsx)
+COPY packages/shared/ packages/shared/
+
+# Copy server source (tsx runs from source, not compiled)
+COPY apps/server/src/ apps/server/src/
+
+# Copy desktop source (imported by server at runtime via createRequire)
+COPY apps/desktop/src/main/ apps/desktop/src/main/
+
+# Copy built webapp static files
+COPY --from=webapp-builder /app/apps/webapp/dist/ apps/webapp/dist/
+
+# Create data directory
+RUN mkdir -p /app/data
+
+# Environment defaults
+ENV PORT=3100
+ENV DATA_DIR=/app/data
+ENV WEBAPP_DIR=/app/apps/webapp/dist
+ENV NODE_ENV=production
+
+EXPOSE 3100
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+    CMD node -e "fetch('http://localhost:3100/health').then(r => r.ok ? process.exit(0) : process.exit(1)).catch(() => process.exit(1))"
+
+# Run server via tsx (needed for runtime TS transpilation of desktop imports)
+CMD ["npx", "tsx", "--require", "./apps/server/src/cjs-shims.cjs", "--import", "./apps/server/src/register.ts", "apps/server/src/index.ts"]
