@@ -14,8 +14,9 @@ export class SocketTransport {
   private socket: Socket
   private eventListeners = new Map<string, Set<Function>>()
 
-  constructor(url: string) {
-    this.socket = io(url, {
+  constructor(url?: string) {
+    // When url is undefined, Socket.IO connects to the same origin that served the page
+    this.socket = io(url ?? undefined, {
       transports: ['websocket'],
       reconnection: true,
       reconnectionDelay: 1000,

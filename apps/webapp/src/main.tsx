@@ -4,7 +4,9 @@ import { SocketTransport } from './socket'
 import { createApi } from './api-shim'
 
 // Initialize Socket.IO transport and create the API shim
-const serverUrl = import.meta.env.VITE_SERVER_URL || 'http://localhost:3100'
+// In production (same origin), use undefined so Socket.IO connects to the serving host.
+// In dev, use VITE_SERVER_URL to point to the separate server process.
+const serverUrl = import.meta.env.VITE_SERVER_URL || undefined
 const transport = new SocketTransport(serverUrl)
 
 // Assign to window.api — all stores/components use this
