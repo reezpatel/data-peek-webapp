@@ -56,9 +56,8 @@ COPY packages/shared/package.json packages/shared/package.json
 # Copy server shims
 COPY apps/server/shims/ apps/server/shims/
 
-# Install production dependencies only (plus tsx for runtime TS transpilation)
-RUN pnpm install --frozen-lockfile --ignore-scripts --prod \
-    && cd apps/server && pnpm add tsx@^4.19.4 --save-dev
+# Install all dependencies (tsx is a devDep needed at runtime for TS transpilation)
+RUN pnpm install --frozen-lockfile --ignore-scripts
 
 # Copy shared types (needed at runtime by tsx)
 COPY packages/shared/ packages/shared/
