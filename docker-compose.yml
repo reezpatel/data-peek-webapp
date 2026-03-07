@@ -1,8 +1,6 @@
 services:
   data-peek:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: ghcr.io/reezpatel/data-peek-webapp/data-peek-webapp:latest
     ports:
       - '3100:3100'
     environment:

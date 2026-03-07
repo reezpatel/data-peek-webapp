@@ -83,4 +83,4 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
     CMD node -e "fetch('http://localhost:3100/health').then(r => r.ok ? process.exit(0) : process.exit(1)).catch(() => process.exit(1))"
 
 # Run server via tsx (needed for runtime TS transpilation of desktop imports)
-CMD ["npx", "tsx", "--require", "./apps/server/src/cjs-shims.cjs", "--import", "./apps/server/src/register.ts", "apps/server/src/index.ts"]
+CMD ["pnpm", "--filter", "@data-peek/server", "exec", "tsx", "--require", "./apps/server/src/cjs-shims.cjs", "--import", "./apps/server/src/register.ts", "apps/server/src/index.ts"]
