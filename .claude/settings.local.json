@@ -2,7 +2,19 @@
   "permissions": {
     "allow": [
       "Bash(wc -l /Users/reezpatel/Workspace/personal/data-peek-webapp/apps/desktop/src/renderer/src/components/*.tsx)",
-      "Bash(pnpm install --filter @data-peek/server)"
+      "Bash(pnpm install --filter @data-peek/server)",
+      "Bash(git fetch origin)",
+      "Bash(git remote add upstream https://github.com/Rohithgilla12/data-peek.git)",
+      "Bash(git fetch upstream)",
+      "Bash(git merge upstream/main --no-edit)",
+      "Bash(git merge --no-ff upstream/main --no-edit)",
+      "Bash(git checkout --theirs pnpm-lock.yaml)",
+      "Bash(pnpm install --no-frozen-lockfile)",
+      "Bash(git add pnpm-lock.yaml)",
+      "Bash(git commit --no-edit)",
+      "Bash(pnpm --filter @data-peek/webapp add html-to-image)",
+      "Bash(pnpm --filter @data-peek/webapp build)",
+      "Bash(npx vite build)"
     ]
   }
 }
