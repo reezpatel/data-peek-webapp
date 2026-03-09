@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(wc -l /Users/reezpatel/Workspace/personal/data-peek-webapp/apps/desktop/src/renderer/src/components/*.tsx)",
+      "Bash(pnpm install --filter @data-peek/server)"
+    ]
+  }
+}
